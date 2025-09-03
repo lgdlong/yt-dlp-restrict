@@ -1,103 +1,329 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import { UrlInput } from "@/components/url-input";
+import { AudioQualitySelector } from "@/components/audio-quality-selector";
+import { TemplateInput } from "@/components/template-input";
+import { CommandOutput } from "@/components/command-output";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  type YtDlpConfig,
+  defaultConfig,
+  saveConfig,
+  loadConfig,
+} from "@/lib/ytdlp-utils";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [config, setConfig] = useState<YtDlpConfig>(defaultConfig);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Load saved config on mount
+  useEffect(() => {
+    const saved = loadConfig();
+    if (saved) {
+      setConfig(saved);
+    }
+  }, []);
+
+  // Auto-save when config changes
+  useEffect(() => {
+    saveConfig(config);
+  }, [config]);
+
+  const updateConfig = (updates: Partial<YtDlpConfig>) => {
+    setConfig((prev) => ({ ...prev, ...updates }));
+  };
+
+  const handlePasteClipboard = async (field: keyof YtDlpConfig) => {
+    try {
+      const text = await navigator.clipboard.readText();
+      updateConfig({ [field]: text });
+    } catch (err) {
+      console.error("Failed to read clipboard:", err);
+    }
+  };
+
+  const handleReset = () => {
+    setConfig(defaultConfig);
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Header */}
+        <header className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl bg-foreground text-background">
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            yt‑dlp Command Builder
+          </h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Tạo lệnh yt-dlp để tải video YouTube có giới hạn độ tuổi và chuyển
+            đổi sang MP3. Hỗ trợ Windows PowerShell và Bash.
+          </p>
+        </header>
+
+        <div className="space-y-8">
+          {/* Main Form */}
+          <Card className="shadow-lg border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                Cấu hình tải xuống
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 bg-zinc-50 dark:bg-zinc-900">
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* URL Input */}
+                <div className="md:col-span-2">
+                  <UrlInput
+                    value={config.url}
+                    onChange={(url) => updateConfig({ url })}
+                  />
+                </div>
+
+                {/* Cookies Path */}
+                <div className="md:col-span-2">
+                  <Label htmlFor="cookies" className="mb-3 block">
+                    Đường dẫn cookies.txt
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="cookies"
+                      type="text"
+                      placeholder="E:\ttt-patreon\cookies.txt"
+                      value={config.cookies}
+                      onChange={(e) =>
+                        updateConfig({ cookies: e.target.value })
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePasteClipboard("cookies")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-7 px-2 text-xs"
+                    >
+                      Paste
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Xuất cookies bằng extension (Get cookies.txt). Trình duyệt
+                    không cung cấp đường dẫn tuyệt đối qua File Picker — hãy
+                    dùng nút Paste.
+                  </p>
+                </div>
+
+                {/* Output Directory */}
+                <div>
+                  <Label htmlFor="outdir" className="mb-3 block">
+                    Thư mục lưu (-P)
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="outdir"
+                      type="text"
+                      placeholder="E:\ttt-patreon"
+                      value={config.outdir}
+                      onChange={(e) => updateConfig({ outdir: e.target.value })}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePasteClipboard("outdir")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-7 px-2 text-xs"
+                    >
+                      Paste
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Shell Type */}
+                <div>
+                  <Label htmlFor="shell" className="mb-3 block">
+                    Kiểu shell
+                  </Label>
+                  <Select
+                    value={config.shell}
+                    onValueChange={(value) =>
+                      updateConfig({
+                        shell: value as "powershell" | "bash",
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="powershell">
+                        Windows PowerShell
+                      </SelectItem>
+                      <SelectItem value="bash">
+                        Bash / WSL / macOS / Linux
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    PowerShell dùng backtick `, Bash dùng \
+                  </p>
+                </div>
+
+                {/* Audio Quality */}
+                <div className="md:col-span-2">
+                  <AudioQualitySelector
+                    value={config.audioQuality}
+                    onChange={(audioQuality) => updateConfig({ audioQuality })}
+                  />
+                </div>
+
+                {/* Options */}
+                <div className="md:col-span-2">
+                  <label className="text-sm font-medium text-foreground mb-3 block">
+                    Tùy chọn
+                  </label>
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="embedThumb"
+                        checked={config.embedThumb}
+                        onCheckedChange={(checked) =>
+                          updateConfig({ embedThumb: Boolean(checked) })
+                        }
+                      />
+                      <Label
+                        htmlFor="embedThumb"
+                        className="text-sm cursor-pointer"
+                      >
+                        Nhúng thumbnail
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="embedMeta"
+                        checked={config.embedMeta}
+                        onCheckedChange={(checked) =>
+                          updateConfig({ embedMeta: Boolean(checked) })
+                        }
+                      />
+                      <Label
+                        htmlFor="embedMeta"
+                        className="text-sm cursor-pointer"
+                      >
+                        Nhúng metadata
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="noPlaylist"
+                        checked={config.noPlaylist}
+                        onCheckedChange={(checked) =>
+                          updateConfig({ noPlaylist: Boolean(checked) })
+                        }
+                      />
+                      <Label
+                        htmlFor="noPlaylist"
+                        className="text-sm cursor-pointer"
+                      >
+                        Không tải playlist
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Archive */}
+                <div className="md:col-span-2">
+                  <Label htmlFor="archive" className="mb-3 block">
+                    Bỏ qua video đã tải (--download-archive)
+                  </Label>
+                  <Input
+                    id="archive"
+                    type="text"
+                    placeholder="E:\ttt-patreon\archive.txt"
+                    value={config.archive}
+                    onChange={(e) => updateConfig({ archive: e.target.value })}
+                  />
+                </div>
+
+                {/* Template */}
+                <div className="md:col-span-2">
+                  <TemplateInput
+                    value={config.template}
+                    onChange={(template) => updateConfig({ template })}
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/30 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
+                <Button type="button" variant="outline" onClick={handleReset}>
+                  Đặt lại
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Command Output */}
+          <Card className="shadow-lg border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                Kết quả lệnh
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="bg-zinc-50 dark:bg-zinc-900">
+              <CommandOutput config={config} />
+            </CardContent>
+          </Card>
+
+          {/* Tips */}
+          <Card className="shadow-lg border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                💡 Mẹo & xử lý sự cố
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="bg-zinc-50 dark:bg-zinc-900">
+              <div className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
+                <ul className="space-y-2">
+                  <li>
+                    • Cookies phải export khi đang đăng nhập vào youtube.com
+                    bằng tài khoản đã xác minh tuổi.
+                  </li>
+                  <li>
+                    • Nếu gặp lỗi đăng nhập tuổi, hãy export lại cookies mới;
+                    cookie có hạn.
+                  </li>
+                  <li>
+                    • Không dùng --no-playlist nếu bạn nhập URL playlist và muốn
+                    tải toàn bộ.
+                  </li>
+                  <li>• Dùng --download-archive để tránh tải trùng lần sau.</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Footer */}
+        <footer className="mt-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            © 2025 — yt‑dlp command helper. Dùng cho mục đích hợp pháp / cá
+            nhân.
+          </p>
+        </footer>
+      </div>
     </div>
   );
 }
