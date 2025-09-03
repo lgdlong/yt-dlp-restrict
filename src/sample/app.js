@@ -46,7 +46,7 @@ function load(){
     fields.forEach(id=>{ if(data[id]!==undefined) $("#"+id).value = data[id]; });
     $('#embedThumb').checked = !!data.embedThumb; $('#embedMeta').checked = !!data.embedMeta; $('#noPlaylist').checked = !!data.noPlaylist;
     if(data.aq){ const pill = document.querySelector(`#aq .pill input[value="${data.aq}"]`)?.parentElement; if(pill){ $$('#aq .pill').forEach(p=>p.classList.remove('active')); pill.classList.add('active'); pill.firstChild.checked=true; } }
-  }catch(e){}
+  }catch{}
 }
 load();
 

@@ -102,7 +102,7 @@ export function TemplateInput({ value, onChange }: TemplateInputProps) {
       {currentExample && (
         <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded border">
           <div className="font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-            Ví dụ cho mẫu "{currentExample.name}":
+            Ví dụ cho mẫu &ldquo;{currentExample.name}&rdquo;:
           </div>
           <code className="text-zinc-600 dark:text-zinc-400 block bg-white dark:bg-zinc-900 p-2 rounded border text-sm">
             {currentExample.example}

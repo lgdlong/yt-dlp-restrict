@@ -16,7 +16,7 @@ export function CommandOutput({ config }: CommandOutputProps) {
       await navigator.clipboard.writeText(command);
       setStatus("Đã sao chép vào clipboard");
       setTimeout(() => setStatus(""), 2000);
-    } catch (err) {
+    } catch {
       setStatus("Lỗi khi sao chép");
       setTimeout(() => setStatus(""), 2000);
     }

@@ -88,8 +88,8 @@ export function UrlInput({ value, onChange }: UrlInputProps) {
         </div>
       )}
       <p className="text-xs text-muted-foreground">
-        Hỗ trợ cả video lẫn playlist. Nếu là playlist, bỏ chọn "Không tải
-        playlist" ở dưới.
+        Hỗ trợ cả video lẫn playlist. Nếu là playlist, bỏ chọn &ldquo;Không tải
+        playlist&rdquo; ở dưới.
       </p>
     </div>
   );
