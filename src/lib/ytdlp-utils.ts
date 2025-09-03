@@ -29,7 +29,7 @@ export const defaultConfig: YtDlpConfig = {
 export const templatePresets = {
   simple: "%(title)s [%(id)s].%(ext)s",
   uploader: "%(uploader)s - %(title)s [%(id)s].%(ext)s",
-  titleDate: "%(title)s [%(upload_date>%Y-%m-%d)s].%(ext)s",
+  titleDate: "[%(upload_date>%Y-%m-%d)s] %(title)s.%(ext)s",
   dated: "%(title)s [%(id)s] [%(upload_date>%Y-%m-%d)s].%(ext)s",
   playlist:
     "%(playlist_title)s/%(playlist_index)03d - %(title)s [%(id)s].%(ext)s",

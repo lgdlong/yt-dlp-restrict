@@ -29,7 +29,7 @@ export function TemplateInput({ value, onChange }: TemplateInputProps) {
       case templatePresets.titleDate:
         return {
           name: "Ngày",
-          example: "Amazing Video [2024-08-30] [dQw4w9WgXcQ].mp3",
+          example: "[2024-08-30] Amazing Video.mp3",
         };
       case templatePresets.playlist:
         return {
